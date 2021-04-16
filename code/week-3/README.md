@@ -52,3 +52,31 @@ The program consists of five modules:
 ### Assignment
 
 Complete the implementation of EKF with sensor fusion by writing the function `update_ekf()` in the module `kalman_filter`. Details are given in class and instructions are included in comments.
+
+
+
+def update_ekf(self, z):
+        H_j = Jacobian(self.x)
+        S = np.dot(H_j, np.dot(self.P, H_j.T)) + self.R
+        K = np.dot(np.dot(self.P, H_j.T), np.linalg.inv(S))
+
+        px = self.x[0]
+        py = self.x[1]
+        vx = self.x[2]
+        vy = self.x[3]
+        H_x = [sqrt(px*px + py*py), atan2(py,px), (px*vx + py*vy)/sqrt(px*px + py*py)]
+
+        y = z - H_x
+
+        if y[1] > np.pi :
+            y[1] += -2*np.pi
+        elif y[1] < -np.pi :
+            y[1] += 2*np.pi  
+
+        self.x = self.x + np.dot(K, y)
+        print(["SELF.X : ", round(self.x[0],2), round(self.x[1],2), round(self.x[2],2), round(self.x[3],2)])
+        self.P = np.dot((np.eye(len(self.P)) - np.dot(K, H_j)), self.P)  
+
+    # lidar와 radar를 이용하는 KF를 이용한 sensor-fusion logic 중 lidar 계측 정보에 대한 ekf update 부분을 작성
+    # 대상 시스템에서는 계측 모델 (H matrix)이 비선형이기 때문에, Jacobian을 이용하여 update를 진행
+    # 계측값에 대한 오차는 계측 모델을 직접 이용하여 계산하고, 그 외에는 Jacobian을 이용
