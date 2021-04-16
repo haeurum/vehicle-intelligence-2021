@@ -41,18 +41,25 @@ def estimate_pseudo_range(landmarks, p):
 def motion_model(position, mov, priors, map_size, stdev):
     # Initialize the position's probability to zero.
     position_prob = 0.0
+    for x_n in range(map_size) :
+        position_prob += norm_pdf(position - x_n, mov, stdev)*priors[x_n]
+    return position_prob
 
     # TODO: Loop over state space for all possible prior positions,
     # calculate the probability (using norm_pdf) of the vehicle
     # moving to the current position from that prior.
     # Multiply this probability to the prior probability of
     # the vehicle "was" at that prior position.
-    return position_prob
-
+    # print(range(map_size))
 # Observation model (assuming independent Gaussian)
 def observation_model(landmarks, observations, pseudo_ranges, stdev):
     # Initialize the measurement's probability to one.
     distance_prob = 1.0
+    if ((not observations) or (len(observations) > len(pseudo_ranges))) :
+        distance_prob = 0
+    else :
+        for x_n in range(0, len(observations)) :
+            distance_prob *= norm_pdf(observations[x_n], pseudo_ranges[x_n], stdev)
 
     # TODO: Calculate the observation model probability as follows:
     # (1) If we have no observations, we do not have any probability.
