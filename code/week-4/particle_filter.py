@@ -1,5 +1,8 @@
 import numpy as np
 from helpers import distance
+import math
+
+import copy as cp
 
 class ParticleFilter:
     def __init__(self, num_particles):
@@ -44,6 +47,7 @@ class ParticleFilter:
             p['y'] = np.random.normal(yf, std_y)
             p['t'] = np.random.normal(tf, std_theta)
 
+
     # Find the predicted measurement that is closest to each observed
     #   measurement and assign the observed measurement to this
     #   particular landmark.
@@ -51,29 +55,84 @@ class ParticleFilter:
         associations = []
         # For each observation, find the nearest landmark and associate it.
         #   You might want to devise and implement a more efficient algorithm.
+
         for o in observations:
             min_dist = -1.0
             for p in predicted:
                 dist = distance(o, p)
-                if min_dist < 0.0 or dist < min_dist:
+                # print(p)
+
+                if (min_dist < 0.0) or (dist < min_dist) :
                     min_dist = dist
                     min_id = p['id']
                     min_x = p['x']
                     min_y = p['y']
-            association = {
-                'id': min_id,
-                'x': min_x,
-                'y': min_y,
-            }
+                    
+                association = {
+                    'id': min_id,
+                    'x': min_x,
+                    'y': min_y,
+                }
             associations.append(association)
         # Return a list of associated landmarks that corresponds to
         #   the list of (coordinates transformed) predictions.
         return associations
 
+
     # Update the weights of each particle using a multi-variate
     #   Gaussian distribution.
     def update_weights(self, sensor_range, std_landmark_x, std_landmark_y,
                        observations, map_landmarks):
+
+        for p in self.particles :
+            pos_Ego = {'x':p['x'], 'y':p['y']}
+
+            lm_fov = []
+            for lm in map_landmarks :
+                lm_pos = map_landmarks[lm]
+                dist_lm = distance(lm_pos, pos_Ego)
+
+                if (dist_lm <= sensor_range) :
+                    lm_fov.append({'id':lm, 'x':lm_pos['x'], 'y':lm_pos['y']})
+
+            ob_global_tgt = []
+            [x_Ego, y_Ego, yaw_Ego] = [p['x'], p['y'], p['t']]
+            RotMatrix_LtoG = np.matrix(([math.cos(yaw_Ego), -math.sin(yaw_Ego), x_Ego],
+                        [math.sin(yaw_Ego), math.cos(yaw_Ego), y_Ego],
+                        [0, 0, 1]))
+          
+            for ob in observations :    
+                ob_local = np.array([ob['x'], ob['y'], 1])
+                ob_global = np.dot(RotMatrix_LtoG, ob_local.T)
+                ob_global_tgt.append({'x':ob_global[0,0], 'y':ob_global[0,1]})
+
+            lm_asso = self.associate(lm_fov, ob_global_tgt)
+            p['assoc'] = [landmark['id'] for landmark in lm_asso]
+
+            x_pdf = 1
+            y_pdf = 1
+            p_pdf = 1
+            pdf_sum = 0
+
+            tgt = 0
+            for lm_fov in lm_asso :
+                mu = [lm_fov['x'], lm_fov['y']]
+
+                def norm_pdf(x, m, s):
+                    one_over_sqrt_2pi = 1 / math.sqrt(2 * math.pi)
+                    return (one_over_sqrt_2pi / s) * math.exp(-0.5 * ((x - m) / s) ** 2)
+
+                lm_tgt_x = ob_global_tgt[tgt]['x']
+                lm_tgt_y = ob_global_tgt[tgt]['y']
+
+                x_pdf *= norm_pdf(lm_tgt_x, mu[0], std_landmark_x)
+                y_pdf *= norm_pdf(lm_tgt_y, mu[1], std_landmark_y)
+                p_pdf *= x_pdf*y_pdf
+                pdf_sum += p_pdf
+                tgt += 1
+            p['w'] = p_pdf
+
+
         # TODO: For each particle, do the following:
         # 1. Select the set of landmarks that are visible
         #    (within the sensor range).
@@ -92,13 +151,35 @@ class ParticleFilter:
         #    The resulting probability is the product of probabilities
         #    for all the observations.
         # 5. Update the particle's weight by the calculated probability.
-
         pass
+
 
     # Resample particles with replacement with probability proportional to
     #   their weights.
     def resample(self):
-        return
+
+        weights = [p['w'] for p in self.particles]
+        w_cumsum = np.cumsum(weights)
+        w_mean = np.sum(weights) / len(weights)
+        weight_idx = np.zeros(len(weights), dtype=np.int8)
+        
+        w_pointer = 0.0
+        i = w_idx = 0
+        while i > len(weights):
+            if w_cumsum[w_idx] >= w_pointer:
+                weight_idx[i] = w_idx
+            else:
+                weight_idx[i] = w_idx
+                w_idx += 1
+            w_pointer += w_mean
+            i += 1
+            
+        new_particles = [self.particles[i].copy() for i in weight_idx]
+
+        self.particles = []
+        self.particles = new_particles.copy()        
+        
+                
         # TODO: Select (possibly with duplicates) the set of particles
         #       that captures the posteior belief distribution, by
         # 1. Drawing particle samples according to their weights.
@@ -107,7 +188,6 @@ class ParticleFilter:
         #    references to mutable objects in Python.
         # Finally, self.particles shall contain the newly drawn set of
         #   particles.
-
         pass
 
     # Choose the particle with the highest weight (probability)
