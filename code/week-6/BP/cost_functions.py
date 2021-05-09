@@ -20,26 +20,43 @@ computed by get_helper_data function.
 '''
 
 # weights for costs
-REACH_GOAL = 0
-EFFICIENCY = 0
+REACH_GOAL = 1
+EFFICIENCY = 0.1
 
 DEBUG = False
 
 def goal_distance_cost(vehicle, trajectory, predictions, data):
+    error_Lat = abs((vehicle.goal_lane - data.intended_lane) + (vehicle.goal_lane - data.final_lane))
+    error_Long = data.end_distance_to_goal
+
+    cost = (error_Lat*error_Lat) / error_Long
+    return cost
+
     '''
     Cost increases based on distance of intended lane (for planning a
     lane change) and final lane of a trajectory.
     Cost of being out of goal lane also becomes larger as vehicle approaches
     the goal distance.
     '''
-    return 0
 
 def inefficiency_cost(vehicle, trajectory, predictions, data):
+    
+    cost = 0    
+    velocity_intended_lane = velocity(predictions, data.intended_lane)
+    if not (velocity_intended_lane is None) : 
+        if (velocity_intended_lane < vehicle.target_speed) :
+            cost += vehicle.target_speed - velocity_intended_lane
+
+    velocity_final_lane = velocity(predictions, data.final_lane)
+    if not (velocity_final_lane is None) : 
+        if  (velocity_final_lane < vehicle.target_speed) :
+            cost += vehicle.target_speed - velocity_final_lane
+
+    return cost
     '''
     Cost becomes higher for trajectories with intended lane and final lane
     that have slower traffic.
     '''
-    return 0
 
 def calculate_cost(vehicle, trajectory, predictions):
     '''
@@ -48,8 +65,9 @@ def calculate_cost(vehicle, trajectory, predictions):
     trajectory_data = get_helper_data(vehicle, trajectory, predictions)
     cost = 0.0
     # list of cost functions and their associated costs
-    cf_list = [goal_distance_cost, inefficiency_cost]
+    cf_list = [goal_distance_cost, inefficiency_cost] 
     weight_list = [REACH_GOAL, EFFICIENCY]
+
 
     for weight, cf in zip(weight_list, cf_list):
         new_cost = weight \
@@ -75,6 +93,7 @@ def get_helper_data(vehicle, trajectory, predictions):
     differentiate between planning and executing a lane change
     in the cost functions.
     '''
+
 
     last = trajectory[1]
 
