@@ -22,6 +22,31 @@ class Vehicle(object):
 
 
     def choose_next_state(self, predictions):
+        possible_state = self.successor_states()
+
+        cost_List = []
+        cost_min = 9999
+        
+        ind = 0
+
+        for state_tgt in possible_state : 
+            trajectory_tgt = self.generate_trajectory(state_tgt, predictions)
+            cost_tgt = calculate_cost(self, trajectory_tgt, predictions)
+            cost_List.append({'state':state_tgt, 'cost':cost_tgt})
+
+            if (ind == 0) : 
+                cost_min = cost_tgt
+                sate_min = state_tgt
+                trajectory_min = trajectory_tgt
+            else :
+                if (cost_tgt < cost_min) :
+                    cost_min = cost_tgt
+                    sate_min = state_tgt
+                    trajectory_min = trajectory_tgt
+            ind += 1
+        print(sate_min)
+        return trajectory_min
+
         '''
         Implement the transition function code for the vehicle's
         behaviour planning finite state machine, which operates based on
@@ -58,10 +83,11 @@ class Vehicle(object):
 
         # Note that the return value is a trajectory, where a trajectory
         # is a list of Vehicle objects with two elements.
-        return [
-            Vehicle(self.lane, self.s, self.v, self.a, self.state),
-            Vehicle(self.lane, self.position_at(1), self.v, 0, self.state)
-        ]
+
+        # return [
+        #     Vehicle(self.lane, self.s, self.v, self.a, self.state),
+        #     Vehicle(self.lane, self.position_at(1), self.v, 0, self.state)
+        # ]
 
     def successor_states(self):
         '''
