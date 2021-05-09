@@ -50,26 +50,28 @@ You are highly encouraged to experiment with different (more complex) maps and d
 
 [assignment - 1]
 
-Step 0. algorithm 변수 정의
-    init : 차량의 초기 상태 변수 (y, x, o)
-    goal : grid map에서 도착지 정보 (y, x)
-    cost : 각 action에 대한 cost
-    value : Map의 각 cell에 대한 cost를 저장하기 위한 변수 
-    policy : Map의 각 cell마다 cost에 따라 결정된 목적지로 향하는 action
+Step 0. algorithm 변수 정의.
+    init : 차량의 초기 상태 변수 (y, x, o).
+    goal : grid map에서 도착지 정보 (y, x).
+    cost : 각 action에 대한 cost.
+    value : Map의 각 cell에 대한 cost를 저장하기 위한 변수 .
+    policy : Map의 각 cell마다 cost에 따라 결정된 목적지로 향하는 action.
     
-Step 2. Dynamic programming 반복
+Step 2. Dynamic programming 반복.
     각 cell의 cost와 목적지로 가기 위한 action을 저장하기 위한 변수 초기화
     
 Step2-1. 
-    target cell가 goal인 경우의 알고리즘 변수 지정 (cost = 0)
+    target cell가 goal인 경우의 알고리즘 변수 지정 (cost = 0).
+    
     if (y, x) == goal and value[(t, y, x)] > 0:
 	value[(t,y,x)] = 0
 	policy[(t,y,x)] = -9999
 	change = True
 
 Step2-2.
-    target cell이 goal이 아니지만 유효한 좌표인 경우, 각 action을 통해 이동가능한 cell에 대한 체크
-    가능한 action 중 가장 작은 cost를 갖는 action으로 target cell의 policy 지정
+    target cell이 goal이 아니지만 유효한 좌표인 경우, 각 action을 통해 이동가능한 cell에 대한 체크.
+    가능한 action 중 가장 작은 cost를 갖는 action으로 target cell의 policy 지정.
+    
     elif grid[(y, x)] == 0:
 	for act in range(len(init)) :
 	    o2 = (t + action[act])
@@ -119,8 +121,8 @@ Step 3. policy plotting code
 
 [assignment - 2]
 
-각 action에 대한 cost를 변경함에 따라 알고리즘에 의해 결정되는 path는 달라짐
-위 assignment-1에서는 cost를 (2,1,20)으로 설정했을 때 결정된 path이고
+각 action에 대한 cost를 변경함에 따라 알고리즘에 의해 결정되는 path는 달라짐.
+위 assignment-1에서는 cost를 (2,1,20)으로 설정했을 때 결정된 path 이고.
 cost를 (2,1,10)으로 설정한 경우에는 아래와 같은 결과를 얻을 수 있다.
 
 ![image](https://user-images.githubusercontent.com/80522886/117574457-226f8f00-b118-11eb-911a-327ff939af71.png)
