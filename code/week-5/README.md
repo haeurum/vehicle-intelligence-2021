@@ -38,3 +38,7 @@ This example is intended to illustrate the algorithm's capability of generating 
 because of the prohibitively high cost associated with a left turn.
 
 You are highly encouraged to experiment with different (more complex) maps and different cost settings for each type of action.
+
+# Week 5 - Path Planning & the A* Algorithm
+
+---
