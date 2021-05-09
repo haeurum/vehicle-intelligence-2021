@@ -131,6 +131,10 @@ Remember that our state machine should be geared towards reaching the goal in an
         return self.classes[res.argmax(axis=0)]
 
 
+![image](https://user-images.githubusercontent.com/80522886/117577765-273b3f80-b126-11eb-9c65-a0dcafdebad0.png)
+
+
+
 [assignment - 2]
 
 - Choose_next_state function
@@ -197,4 +201,6 @@ Remember that our state machine should be geared towards reaching the goal in an
 		    cost += vehicle.target_speed - velocity_final_lane
 
 	    return cost
+
+![image](https://user-images.githubusercontent.com/80522886/117577746-112d7f00-b126-11eb-9edc-84faa1ac2281.png)
 
