@@ -39,6 +39,9 @@ because of the prohibitively high cost associated with a left turn.
 
 You are highly encouraged to experiment with different (more complex) maps and different cost settings for each type of action.
 
-# Week 5 - Path Planning & the A* Algorithm
+# Week 5 - Path Planning & the A* Algorithm [Assignment]  
 
 ---
+
+- dynamic programming 기반의 path planning algorithm에서 차량의 state를 x,y에 orientaion까지 추가하여 구성
+- cost를 변경하여, planning된 path에 대한 경로 확인
